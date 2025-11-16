@@ -1,0 +1,47 @@
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: UrlShortenerDb
+      auto-index-creation: true
+  #      local redis
+  redis:
+    host: localhost
+    port: 6379
+
+  kafka:
+    bootstrap-servers: pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092
+
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username='MDTS7EJRO5ZAOQZV' password='cfltfx2/ZHt3ENOAvlMnzeQ8ldwKziR5wB0hAUxFVxjzvqD1ug67SYj+dyzjF8LA';
+      session.timeout.ms: 45000
+
+    # -------------------
+    # Producer Config
+    # -------------------
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+      consumer:
+        group-id: default-group
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        properties:
+          spring.json.trusted.packages: com.spring.springboot.UrlShortener.model
+          spring.json.use.type.headers: false
+client:
+  id=ccloud-springboot-client-6744cec4-bfe7-463b-8bf4-b3ad39009f93:
+
+#    virus total
+virustotal:
+  api-key: "f4e64c3333740f024cda4e725d11efe7f2b85324e4aa15dd628fadc062ce4c77"
+  analysis-url: "https://www.virustotal.com/api/v3/urls"
+
+
+

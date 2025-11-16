@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Suspicious Link Warning</title>
+</head>
+<body style="font-family:sans-serif;text-align:center;margin-top:100px;">
+
+<h2>This link looks suspicious</h2>
+<p>The link you’re trying to visit may be unsafe or unverified.</p>
+<p><strong>URL:</strong> <span th:text="${longUrl}"></span></p>
+
+<button
+        id="proceedBtn"
+        style="padding:10px 20px;background-color:orange;border:none;color:white;">
+    Proceed Anyway
+</button>
+
+<br/>
+<a href="/" style="color:red;">Go Back</a>
+
+<script th:inline="javascript">
+    const shortCode = /*[[${shortCode}]]*/ '';
+    document.getElementById("proceedBtn").addEventListener("click", () => {
+        window.location.href = `/url.shortener/confirm/${shortCode}`;
+    });
+</script>
+
+</body>
+</html>
+
