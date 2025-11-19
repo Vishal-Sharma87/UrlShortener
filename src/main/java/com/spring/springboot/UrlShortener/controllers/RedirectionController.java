@@ -45,7 +45,7 @@ public class RedirectionController {
                 // Direct redirect
                 return "redirect:" + url.getActualUrl();
 
-            case FinalVerdict.Verdict.SUSPICIOUS:
+            case FinalVerdict.Verdict.SUSPICIOUS, FinalVerdict.Verdict.PENDING_REVERIFICATION:
                 // Show warning + confirm
                 model.addAttribute("shortCode", hash);
                 model.addAttribute("longUrl", url.getActualUrl());

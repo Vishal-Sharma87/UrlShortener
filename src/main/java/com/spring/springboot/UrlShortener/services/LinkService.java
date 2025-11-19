@@ -3,8 +3,7 @@ package com.spring.springboot.UrlShortener.services;
 import com.spring.springboot.UrlShortener.entity.Links;
 import com.spring.springboot.UrlShortener.model.LinkCreationDto;
 import com.spring.springboot.UrlShortener.repositories.LinkRepository;
-import com.spring.springboot.UrlShortener.repositories.MongoService;
-import com.spring.springboot.UrlShortener.repositories.UserRepository;
+import com.spring.springboot.UrlShortener.repositories.MongoLinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,7 @@ public class LinkService {
 
     private final LinkRepository linkRepository;
     private final RedisService redisService;
-    private final MongoService mongoService;
+    private final MongoLinkService mongoLinkService;
     private final KafkaTemplate<String, LinkCreationDto> kafkaTemplate;
     private final String linkCreationTopic = "URL_SHORTENER_link_creation";
 
@@ -49,7 +48,7 @@ public class LinkService {
     }
 
     public List<Links> getAllLinksOfAnUser(String userName, String type) {
-        return mongoService.getAllLinksOfAnUserByType(userName, type);
+        return mongoLinkService.getAllLinksOfAnUserByType(userName, type);
     }
 
     public void deleteLinkByHashedKey(String hash) {
@@ -66,17 +65,17 @@ public class LinkService {
     }
 
     public void deleteAllLinksOfAnUserByType(String userName, String type) {
-        mongoService.deleteAllLinksOfAnUserByType(userName, type);
+        mongoLinkService.deleteAllLinksOfAnUserByType(userName, type);
     }
 
     public Links findLinkOfUserById(String idToFind, String userName) {
-        return mongoService.getLinkOfAnUserById(idToFind, userName);
+        return mongoLinkService.getLinkOfAnUserById(idToFind, userName);
     }
 
     public Links findLinkOfUserByHashedKey(String hashedKey, String userName) {
         Long idToFind = Base62.decode(hashedKey);
 
-        return mongoService.getLinkOfAnUserById(idToFind.toString(), userName);
+        return mongoLinkService.getLinkOfAnUserById(idToFind.toString(), userName);
     }
 
     public String generateShortUrl(String generatedHash) {
@@ -113,5 +112,9 @@ public class LinkService {
 
         Long idToFind = Base62.decode(hashedKey);
         return linkRepository.findById(idToFind).orElse(null);
+    }
+
+    public void save(Links link) {
+        linkRepository.save(link);
     }
 }

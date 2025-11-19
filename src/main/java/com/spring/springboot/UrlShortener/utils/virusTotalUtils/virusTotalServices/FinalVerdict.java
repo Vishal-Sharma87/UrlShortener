@@ -25,7 +25,7 @@ public class FinalVerdict {
 
     @ToString
     public enum Verdict {
-        SAFE, SUSPICIOUS, UNVERIFIED, MALICIOUS
+        SAFE, SUSPICIOUS, UNVERIFIED, MALICIOUS, PENDING_REVERIFICATION
     }
 
 }

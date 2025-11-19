@@ -14,15 +14,19 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MongoService {
+public class MongoLinkService {
 
     private final MongoTemplate mongoTemplate;
     private final LinkRepository linkRepository;
 
+
+    String linkStatus = "status";
+    String ownerUserName = "ownerUserName";
+
     private List<Links> getAllLinksOfAnUser(String userName) {
 
         Query query = new Query();
-        query.addCriteria(Criteria.where("ownerUserName").is(userName));
+        query.addCriteria(Criteria.where(ownerUserName).is(userName));
 
 
         return mongoTemplate.find(query, Links.class);
@@ -32,8 +36,8 @@ public class MongoService {
         Query query = new Query();
 
         Criteria criteria = new Criteria().andOperator(
-                Criteria.where("ownerUserName").is(userName),
-                Criteria.where("status").is("SAFE")
+                Criteria.where(ownerUserName).is(userName),
+                Criteria.where(linkStatus).is("SAFE")
         );
         query.addCriteria(criteria);
 
@@ -44,8 +48,8 @@ public class MongoService {
         Query query = new Query();
 
         Criteria criteria = new Criteria().andOperator(
-                Criteria.where("ownerUserName").is(userName),
-                Criteria.where("status").in(List.of("SUSPICIOUS", "MALICIOUS"))
+                Criteria.where(ownerUserName).is(userName),
+                Criteria.where(linkStatus).in(List.of("SUSPICIOUS", "MALICIOUS"))
         );
         query.addCriteria(criteria);
 
@@ -55,7 +59,7 @@ public class MongoService {
     private void deleteAllLinksOfAnUser(String userName) {
 
         Query query = new Query();
-        query.addCriteria(Criteria.where("ownerUserName").is(userName));
+        query.addCriteria(Criteria.where(ownerUserName).is(userName));
 
 
         List<Long> allLinkIdsToDelete = mongoTemplate.find(query, Links.class).stream().map(Links::getId).toList();
@@ -66,8 +70,8 @@ public class MongoService {
         Query query = new Query();
 
         Criteria criteria = new Criteria().andOperator(
-                Criteria.where("ownerUserName").is(userName),
-                Criteria.where("status").is("SAFE")
+                Criteria.where(ownerUserName).is(userName),
+                Criteria.where(linkStatus).is("SAFE")
         );
         query.addCriteria(criteria);
 
@@ -79,8 +83,8 @@ public class MongoService {
         Query query = new Query();
 
         Criteria criteria = new Criteria().andOperator(
-                Criteria.where("ownerUserName").is(userName),
-                Criteria.where("status").in(List.of("SUSPICIOUS", "MALICIOUS"))
+                Criteria.where(ownerUserName).is(userName),
+                Criteria.where(linkStatus).in(List.of("SUSPICIOUS", "MALICIOUS"))
         );
         query.addCriteria(criteria);
 
@@ -112,9 +116,18 @@ public class MongoService {
 
         Criteria criteria = new Criteria().andOperator(
                 Criteria.where("id").is(idToFind),
-                Criteria.where("ownerUserName").is(userName)
+                Criteria.where(ownerUserName).is(userName)
         );
         query.addCriteria(criteria);
         return mongoTemplate.find(query, Links.class).stream().findFirst().orElse(null);
+    }
+
+    public Links findLinkByHashedKey(String hashedKey) {
+        Query query = new Query();
+
+        query.addCriteria(Criteria.where("hashedKey").is(hashedKey));
+
+        List<Links> links = mongoTemplate.find(query, Links.class);
+        return links.getFirst();
     }
 }

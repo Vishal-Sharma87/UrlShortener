@@ -51,6 +51,7 @@ public class ConsumerLinkCreationEvent {
                             .abuseReports(new ArrayList<>())
                             .firstReportedTime(null)
                             .lastReportedTime(null)
+                            .reportCount(0)
                             .build();
                     linkService.saveNewLink(createdLink);
 

@@ -18,24 +18,24 @@ import java.util.List;
 public class ReportLinkRequestDto {
 
 
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "Name is mandatory")
+    @NotNull(message = "Name is mandatory")
     private String reporterName;
 
-    @Email
+    @Email(message = "Email is required.")
     private String reporterEmail;
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Provide link to report is mandatory")
+    @NotBlank(message = "Provide link to report is mandatory")
     private String linkToReport;
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Give at-least one reason of abuse report.")
+    @NotBlank(message = "Give at-least one reason of abuse report.")
     private List<String> cause;
 
     private String description;
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Otp is required")
+    @NotBlank(message = "Otp can't be empty")
     private String otp;
 }
