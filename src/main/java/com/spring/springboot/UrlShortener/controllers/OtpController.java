@@ -3,14 +3,14 @@ package com.spring.springboot.UrlShortener.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spring.springboot.UrlShortener.dto.OtpRequestDto;
-import com.spring.springboot.UrlShortener.dto.OtpResponseDto;
 import com.spring.springboot.UrlShortener.services.OtpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/verify")
@@ -22,18 +22,13 @@ public class OtpController {
 
     //    generate otp for a reporter
     @PostMapping("/generate-otp")
-    public ResponseEntity<OtpResponseDto> generateOtpForEmail(@Valid @RequestBody OtpRequestDto otpRequestDto) throws JsonProcessingException {
+    public ResponseEntity<String> generateOtpForEmail(@Valid @RequestBody OtpRequestDto otpRequestDto) throws JsonProcessingException {
 
-        String otpForEmail = otpService.sendOtp(otpRequestDto.getReporterEmail());
+        otpService.sendOtp(otpRequestDto.getEntityEmail());
 
-        String otpGenerationMessage = "OTP: " + otpForEmail + " generated for email: " + otpRequestDto.getReporterEmail();
+        String otpGenerationMessage = "OTP is sent to the email address: " + otpRequestDto.getEntityEmail();
 
-        OtpResponseDto otpResponse = OtpResponseDto.builder()
-                .otp(otpForEmail)
-                .timestamp(LocalDateTime.now())
-                .message(otpGenerationMessage)
-                .build();
-        return ResponseEntity.ok(otpResponse);
+        return ResponseEntity.ok(otpGenerationMessage);
     }
 
 

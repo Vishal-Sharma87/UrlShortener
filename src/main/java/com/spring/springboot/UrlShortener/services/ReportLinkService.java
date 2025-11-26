@@ -4,36 +4,25 @@ package com.spring.springboot.UrlShortener.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spring.springboot.UrlShortener.dto.ReportLinkRequestDto;
 import com.spring.springboot.UrlShortener.entity.AbuseReport;
-import com.spring.springboot.UrlShortener.entity.Links;
 import com.spring.springboot.UrlShortener.exceptions.InvalidOTPException;
 import com.spring.springboot.UrlShortener.exceptions.LinkAlreadyReportedByCurrentEmailOfReporterException;
 import com.spring.springboot.UrlShortener.repositories.AbuseReportRepository;
 import com.spring.springboot.UrlShortener.repositories.MongoLinkService;
 import com.spring.springboot.UrlShortener.repositories.MongoReportLinkService;
-import com.spring.springboot.UrlShortener.utils.virusTotalUtils.virusTotalServices.FinalVerdict;
+import com.spring.springboot.UrlShortener.services.asyncServices.AsyncReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class ReportLinkService {
 
     private final OtpService otpService;
-    private final MongoLinkService mongoLinkService;
-    private final LinkService linkService;
     private final MongoReportLinkService mongoReportLinkService;
-    private final AbuseReportRepository abuseReportRepository;
 
-    private final ReportLinkService self;
+    private final AsyncReportService asyncReportService;
 
-
-    public String generateOtp(String email) throws JsonProcessingException {
-        return otpService.sendOtp(email);
-    }
 
     public void tryAcceptingReport(@Valid ReportLinkRequestDto dto) {
         /*
@@ -67,39 +56,7 @@ public class ReportLinkService {
 //        if we are reaching this lines then the link is valid and needs to report
 //        step 3: -> make a call to report this url
 //        calling the @Async annotated method using proxy
-        self.acceptReport(hashedKey, dto);
 
-    }
-
-    @Async
-    public void acceptReport(String hashedKey, @Valid ReportLinkRequestDto dto) {
-        AbuseReport reportObject = AbuseReport.builder()
-                .reporterName(dto.getReporterName())
-                .reporterEmail(dto.getReporterEmail())
-                .reportStatus("Pending")
-                .cause(dto.getCause())
-                .description(dto.getDescription())
-                .hashedKeyOfLink(hashedKey)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        Links link = mongoLinkService.findLinkByHashedKey(hashedKey);
-
-        int reportCount = link.getReportCount();
-        link.setReportCount(reportCount + 1);
-
-        linkService.save(link);
-
-//        if report count crosses a threshold-> change its status as suspicious till manual verification
-        if (reportCount == 3) {
-            link.setStatus(FinalVerdict.Verdict.PENDING_REVERIFICATION);
-            linkService.save(link);
-        }
-
-        saveNewReport(reportObject);
-    }
-
-    public void saveNewReport(AbuseReport reportObject) {
-        abuseReportRepository.save(reportObject);
+        asyncReportService.acceptReport(hashedKey, dto);
     }
 }

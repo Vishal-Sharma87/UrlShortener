@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +28,8 @@ public class AuthService {
         if (userInDb != null)
             throw new UserWithUserNameAlreadyExitsException("User with userName :" + request.getUserName() + " already exists");
 
+
+//        TODO verify the otp
         UrlUser user = UrlUser.builder()
                 .email(request.getEmail())
                 .userName(request.getUserName())

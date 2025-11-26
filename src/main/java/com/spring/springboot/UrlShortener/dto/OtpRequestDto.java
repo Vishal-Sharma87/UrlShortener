@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 public class OtpRequestDto {
 
     @Email(message = "Enter a valid email id.")
-    private String reporterEmail;
+    private String entityEmail;
 
     @NotNull(message = "Provide valid name")
     @NotBlank(message = "Name can't be empty")
-    private String reporterName;
+    private String entityName;
 
 }

@@ -1,10 +1,10 @@
 package com.spring.springboot.UrlShortener.controllers;
 
 import com.spring.springboot.UrlShortener.dto.ReportLinkRequestDto;
-import com.spring.springboot.UrlShortener.dto.ReportLinkResponseDto;
 import com.spring.springboot.UrlShortener.services.ReportLinkService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,10 +20,10 @@ public class ReportLinkController {
 
 
     @PostMapping()
-    public ResponseEntity<ReportLinkResponseDto> reportLink(@Valid @RequestBody ReportLinkRequestDto dto) {
+    public ResponseEntity<String> reportLink(@Valid @RequestBody ReportLinkRequestDto dto) {
 
         reportLinkService.tryAcceptingReport(dto);
-        return null;
+        return new ResponseEntity<>("We have accepted your request, we'll notify you once we have confirmation about the link", HttpStatus.OK);
     }
 
 }

@@ -3,10 +3,14 @@ package com.spring.springboot.UrlShortener.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.springboot.UrlShortener.dto.OtpDto;
+import com.spring.springboot.UrlShortener.dto.emailComponents.EmailContentBuilder;
+import com.spring.springboot.UrlShortener.dto.emailComponents.EmailDto;
+import com.spring.springboot.UrlShortener.services.emailServices.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -21,6 +25,9 @@ public class OtpService {
 
     private final SecureRandom random = new SecureRandom();
     private final StringRedisTemplate stringRedisTemplate;
+
+    private final EmailContentBuilder emailContentBuilder;
+    private final EmailService emailService;
     ObjectMapper mapper = new ObjectMapper();
 
     //    generate a random numeric string of length 4
@@ -44,7 +51,7 @@ public class OtpService {
     }
 
 
-    public String sendOtp(String email) throws JsonProcessingException {
+    public void sendOtp(String email) throws JsonProcessingException {
 //        step 1: -> generate random 4 len numeric string
         String generatedOtp = generateFourLengthNumericOtp();
 
@@ -66,9 +73,18 @@ public class OtpService {
         stringRedisTemplate.opsForValue().set("otpFor:" + email, stringOtpDoc, 5, TimeUnit.MINUTES);
 
 //        step 4: -> email the otp
-        return generatedOtp;
+//        TODO send the generated otp to the given mail address
 
+
+        EmailDto emailDto = emailContentBuilder.getEmilDtoWithOtpContent(generatedOtp, email);
+        try {
+            emailService.sendEmail(emailDto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+
+
 
     public boolean verifyOtp(String email, String otp) throws JsonProcessingException {
         String salt = "random-salt-xyz";

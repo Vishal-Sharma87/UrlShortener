@@ -30,7 +30,6 @@ public class ReportLinkRequestDto {
     private String linkToReport;
 
     @NotNull(message = "Give at-least one reason of abuse report.")
-    @NotBlank(message = "Give at-least one reason of abuse report.")
     private List<String> cause;
 
     private String description;
