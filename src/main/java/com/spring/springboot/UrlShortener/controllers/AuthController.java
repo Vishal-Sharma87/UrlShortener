@@ -27,6 +27,7 @@ public class AuthController {
     // Login endpoint
     @PostMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
+//        check credentials and if correct generate JWT using username
         return ResponseEntity.ok(authService.loginUser(request));
     }
 }

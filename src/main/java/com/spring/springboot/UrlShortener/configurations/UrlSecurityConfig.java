@@ -1,12 +1,12 @@
 package com.spring.springboot.UrlShortener.configurations;
 
+import com.spring.springboot.UrlShortener.filter.JwtFilter;
 import com.spring.springboot.UrlShortener.services.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -21,20 +22,23 @@ import org.springframework.security.web.SecurityFilterChain;
 public class UrlSecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
+    private final JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Enable HTTP Basic Authentication
-                .httpBasic(Customizer.withDefaults())
+
 
                 // Authorize requests
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
-                        .requestMatchers("/auth/**","/verify/**", "/url.shortener/**","/report-abuse/**").permitAll()
+                        .requestMatchers("/auth/**", "/verify/**", "/url.shortener/**", "/report-abuse/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                // Enable JWT based Authentication
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 
                 // Disable CSRF for simplicity (only if APIs, not for forms)
                 .csrf(AbstractHttpConfigurer::disable);

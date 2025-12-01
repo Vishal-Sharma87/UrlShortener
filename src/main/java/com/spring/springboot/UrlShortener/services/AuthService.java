@@ -5,6 +5,7 @@ import com.spring.springboot.UrlShortener.dto.SignupRequest;
 import com.spring.springboot.UrlShortener.entity.UrlUser;
 import com.spring.springboot.UrlShortener.exceptions.UserWithUserNameAlreadyExitsException;
 import com.spring.springboot.UrlShortener.repositories.UserRepository;
+import com.spring.springboot.UrlShortener.services.jwtAuth.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +22,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     // Business logic for signup
     public String registerUser(SignupRequest request) {
@@ -40,7 +42,8 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
-        return "User registered successfully!";
+//        "User registered successfully!"
+        return jwtService.generateJwt(request.getUserName());
     }
 
     // Business logic for login
@@ -52,7 +55,7 @@ public class AuthService {
                             request.getPassword()
                     )
             );
-            return "Login successful!";
+           return jwtService.generateJwt(request.getUserName());
         } catch (Exception e) {
             return "Invalid username or password!";
         }

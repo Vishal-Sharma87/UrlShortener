@@ -94,7 +94,7 @@ public class LinkService {
 
             case "hashedKey" -> findLinkOfUserByHashedKey(value, userName);
 
-            default -> throw new RuntimeException("Method not allowed, try something else.");
+            default -> throw new IllegalArgumentException("Method not allowed, try something else.");
         };
     }
 
@@ -104,7 +104,7 @@ public class LinkService {
 
             case "hashedKey" -> deleteLinkByHashedKey(value);
 
-            default -> throw new RuntimeException("Method not allowed, try something else.");
+            default -> throw new IllegalArgumentException("Method not allowed, try something else.");
         }
     }
 
