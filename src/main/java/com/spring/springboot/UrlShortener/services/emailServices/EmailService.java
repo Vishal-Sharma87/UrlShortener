@@ -7,18 +7,27 @@ import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
+import com.spring.springboot.UrlShortener.dto.emailComponents.EmailContentBuilder;
 import com.spring.springboot.UrlShortener.dto.emailComponents.EmailDto;
+import com.spring.springboot.UrlShortener.entity.UrlUser;
+import com.spring.springboot.UrlShortener.exceptions.SendgridEmailFailedException;
+import com.spring.springboot.UrlShortener.model.LinkCreationDto;
+import com.spring.springboot.UrlShortener.services.UserService;
+import com.spring.springboot.UrlShortener.utils.virusTotalUtils.virusTotalServices.FinalVerdict;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
+    private final EmailContentBuilder emailContentBuilder;
+    private final UserService userService;
     @Value("${sendgrid.api_key}")
     private String sendgridApiKey;
-
     @Value("${sendgrid.verified.senders.email}")
     private String sendgridVerifiedSendersEmail;
 
@@ -51,5 +60,31 @@ public class EmailService {
         Response sendGridResponse = getSendGridResponse(dto);
 //        TODO different functionality according to the response code
 
+    }
+
+    public void sendEmail(FinalVerdict.Verdict verdict, UrlUser userInDb, LinkCreationDto linkCreationDto) {
+
+        EmailDto dto;
+        int malCnt = userInDb.getMaliciousUrlsCreatedCount();
+
+        switch (verdict) {
+            case MALICIOUS, SUSPICIOUS -> {
+                if (malCnt + 1 >= 5)
+                    dto = emailContentBuilder.getEmailDtoWithContentPermanentBlockNotification(userInDb.getEmail());
+                else
+                    dto = emailContentBuilder.getEmailDtoWithContentSuspiciousUrlWarning(linkCreationDto.getLongUrl(), userInDb.getEmail());
+
+                userInDb.setMaliciousUrlsCreatedCount(malCnt + 1);
+                userService.save(userInDb);
+
+            }
+            default ->
+                    dto = emailContentBuilder.getEmailDtoWithContentUrlShortenedConfirmation(linkCreationDto.getGeneratedHash(), linkCreationDto.getLongUrl(), userInDb.getEmail());
+        }
+        try {
+            sendEmail(dto);
+        } catch (IOException e) {
+            throw new SendgridEmailFailedException("Process to send status of newly created short Link has failed, Exception: " + e.getMessage());
+        }
     }
 }

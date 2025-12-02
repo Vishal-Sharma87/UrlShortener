@@ -65,45 +65,7 @@ public class ConsumerLinkCreationEvent {
                             .build();
                     linkService.saveNewLink(createdLink);
 
-//                    userInDb.getLinks().add(createdLink);
-//                    userService.save(userInDb);
-
-                    if (verdict == FinalVerdict.Verdict.MALICIOUS || verdict == FinalVerdict.Verdict.SUSPICIOUS) {
-                        // save this entry into the user, if the count of maliciousUrls touches a predefined threshold then
-                        // block the user from further usage of our services
-                        if (userInDb.getMaliciousUrlsCreatedCount() + 1 >= 5) {
-//                             send an email stating that the user have exceeded the bearable limit of creation of malicious url
-//                             and is blocked and will never be able to short the url
-
-                            EmailDto permanentBlockNotification = emailContentBuilder.getEmailDtoWithContentPermanentBlockNotification(userInDb.getEmail());
-                            try {
-                                emailService.sendEmail(permanentBlockNotification);
-                            } catch (IOException e) {
-                                throw new SendgridEmailFailedException("Something went wrong and email for notification about permanent ban due to exceeding threshold failed. Exception: " + e.getMessage());
-
-                            }
-                        }
-//                        send a confirmation email stating that the url is found suspicious,
-//                          and doing again so can cause permanent ban from accessing the site
-                        EmailDto suspiciousUrlWarning = emailContentBuilder.getEmailDtoWithContentSuspiciousUrlWarning(linkCreationDto.getLongUrl(), userInDb.getEmail());
-                        try {
-                            emailService.sendEmail(suspiciousUrlWarning);
-                        } catch (IOException e) {
-                            throw new SendgridEmailFailedException("Something went wrong and email for notification about link is found suspicious failed. Exception: " + e.getMessage());
-                        }
-//
-                    } else {
-//                             send a confirmation email stating that the url is shortened and is now available for usage
-
-                        EmailDto urlShortenedConfirmation = emailContentBuilder.getEmailDtoWithContentUrlShortenedConfirmation(linkCreationDto.getGeneratedHash(), linkCreationDto.getLongUrl(), userInDb.getEmail());
-
-                        try {
-                            emailService.sendEmail(urlShortenedConfirmation);
-                        } catch (IOException e) {
-                            throw new SendgridEmailFailedException("Something went wrong and email for notification about successful short link creation failed. Exception: " + e.getMessage());
-
-                        }
-                    }
+                    emailService.sendEmail(verdict, userInDb, linkCreationDto);
 
                 });
     }
