@@ -1,5 +1,6 @@
 package com.spring.springboot.UrlShortener.kafka;
 
+import com.spring.springboot.UrlShortener.configurations.KafkaConfig;
 import com.spring.springboot.UrlShortener.model.LinkAnalysisDto;
 import com.spring.springboot.UrlShortener.model.LinkCreationDto;
 import org.junit.jupiter.api.Disabled;
@@ -22,17 +23,13 @@ class KafkaDataflowTest {
 
 
 
-        LinkAnalysisDto analysisDto = LinkAnalysisDto.builder()
-                .key("a")
-                .value("b")
-                .build();
-
         // Send message
 
 //        template1.send("URL_SHORTENER_link_creation", doc);
-        template2.send("URL_SHORTENER_existed_link_analysis", analysisDto);
+        template2.send("URL_SHORTENER_existed_link_analysis", null);
 
 
         int a = 5;
     }
+
 }

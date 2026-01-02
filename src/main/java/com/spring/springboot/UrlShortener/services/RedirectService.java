@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class RedirectService {
     private final MongoTemplate mongoTemplate;
     private final RedisService redisService;
+    private final LinkService linkService;
 
     public RedirectServiceResponseDto getActualUrlIfExists(String hash) throws JsonProcessingException {
 
@@ -38,7 +39,7 @@ public class RedirectService {
 
 //            actual url
             return RedirectServiceResponseDto.builder()
-                    .actualUrl(redisDocument.getActualUrl())
+                    .longUrl(redisDocument.getActualUrl())
                     .status(redisDocument.getStatus())
                     .build();
         }
@@ -77,12 +78,18 @@ public class RedirectService {
 
 //            analysis -> kafka integration
             return RedirectServiceResponseDto.builder()
-                    .actualUrl(linkInDb.getActualUrl())
+                    .longUrl(linkInDb.getActualUrl())
                     .status(linkInDb.getStatus())
                     .build();
         }
 
 //        throw new ResourceWithHashNotExistsException("Invalid url, try with correct url");
         return null;
+    }
+
+    public RedirectServiceResponseDto getUrlStatusIfExists(String hash) {
+
+        return linkService.getLinkStatusIfExists(hash);
+
     }
 }

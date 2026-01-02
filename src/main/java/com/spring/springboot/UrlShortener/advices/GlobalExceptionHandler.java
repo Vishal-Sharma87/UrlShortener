@@ -6,6 +6,7 @@ import com.spring.springboot.UrlShortener.exceptions.ResourceWithHashNotExistsEx
 import com.spring.springboot.UrlShortener.exceptions.UserWithUserNameAlreadyExitsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler {
     // Generic fallback for other exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAllExceptions(Exception ex) {
+        ApiError error = new ApiError(ex.getLocalizedMessage(), 500);
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAllExceptions(AuthenticationException ex) {
         ApiError error = new ApiError(ex.getLocalizedMessage(), 500);
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

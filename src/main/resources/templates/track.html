@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Redirecting...</title>
+    <meta charset="UTF-8">
+
+    <!-- Prevent caching of redirect page -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 60px;
+            background-color: #fafafa;
+        }
+        p {
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+<p>Redirecting, please wait...</p>
+
+<!-- Thymeleaf JavaScript inline ENABLED -->
+<script th:inline="javascript">
+    (function () {
+
+        /* Thymeleaf injected values */
+        const shortHash = /*[[${shortCode}]]*/ '';
+        const longUrl = /*[[${longUrl}]]*/ '';
+
+        /* Safety check */
+        if (!longUrl) {
+            console.error("Redirect failed: longUrl is empty");
+            return;
+        }
+
+        /* Tracking payload */
+        const payload = {
+            shortHash: shortHash,
+
+            screenWidth: window.screen.width,
+
+            viewportWidth: window.innerWidth,
+
+            userAgent: navigator.userAgent,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+
+        /* Fire-and-forget tracking */
+        fetch("/api/track", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload),
+            keepalive: true
+        })
+        .catch(err => console.error("Tracking failed", err))
+        .finally(() => {
+            /* Guaranteed redirect */
+            window.location.replace(longUrl);
+        });
+
+    })();
+</script>
+
+</body>
+</html>

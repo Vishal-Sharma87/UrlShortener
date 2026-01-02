@@ -34,7 +34,7 @@ public class UrlSecurityConfig {
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
-                        .requestMatchers("/auth/**", "/verify/**", "/url.shortener/**", "/report-abuse/**").permitAll()
+                        .requestMatchers("/auth/**", "/verify/**", "/url.shortener/**", "/report-abuse/**", "/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // Enable JWT based Authentication

@@ -9,5 +9,6 @@ import lombok.Data;
 @Builder
 public class RedirectServiceResponseDto {
     private FinalVerdict.Verdict status;
-    private String actualUrl;
+    private String longUrl;
+    private String shortHash;
 }

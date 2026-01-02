@@ -55,11 +55,8 @@ public class EmailService {
     }
 
     public void sendEmail(EmailDto dto) throws IOException {
-//        some functionality
-
-        Response sendGridResponse = getSendGridResponse(dto);
-//        TODO different functionality according to the response code
-
+//        some functionality according to the response from sendgrid
+        getSendGridResponse(dto);
     }
 
     public void sendEmail(FinalVerdict.Verdict verdict, UrlUser userInDb, LinkCreationDto linkCreationDto) {

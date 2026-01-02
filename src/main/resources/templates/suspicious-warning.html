@@ -21,7 +21,7 @@
 <script th:inline="javascript">
     const shortCode = /*[[${shortCode}]]*/ '';
     document.getElementById("proceedBtn").addEventListener("click", () => {
-        window.location.href = `/url.shortener/confirm/${shortCode}`;
+        window.location.href = `/api/confirm/${shortCode}`;
     });
 </script>
 

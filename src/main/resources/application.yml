@@ -50,4 +50,6 @@ sendgrid:
     senders:
       email: ${SENDGRID_EMAIL} #the email which is verified on sendgrid and will be used as from email
 
+jwt:
+  secretKey: ${JWT_SECRET_KEY}
 

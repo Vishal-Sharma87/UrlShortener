@@ -48,16 +48,12 @@ public class AuthService {
 
     // Business logic for login
     public String loginUser(LoginRequest request) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUserName(),
-                            request.getPassword()
-                    )
-            );
-           return jwtService.generateJwt(request.getUserName());
-        } catch (Exception e) {
-            return "Invalid username or password!";
-        }
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUserName(),
+                        request.getPassword()
+                )
+        );
+        return jwtService.generateJwt(request.getUserName());
     }
 }

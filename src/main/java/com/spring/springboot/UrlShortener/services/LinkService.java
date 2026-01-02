@@ -4,6 +4,7 @@ import com.spring.springboot.UrlShortener.entity.Links;
 import com.spring.springboot.UrlShortener.model.LinkCreationDto;
 import com.spring.springboot.UrlShortener.repositories.LinkRepository;
 import com.spring.springboot.UrlShortener.repositories.MongoLinkService;
+import com.spring.springboot.UrlShortener.serviceDtos.serviceResponseDtos.RedirectServiceResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -117,4 +118,18 @@ public class LinkService {
     public void save(Links link) {
         linkRepository.save(link);
     }
+
+    public RedirectServiceResponseDto getLinkStatusIfExists(String hash) {
+        Links link = linkRepository.findById(Base62.decode(hash)).orElse(null);
+        return link == null ? null : RedirectServiceResponseDto.builder()
+                .status(link.getStatus())
+                .shortHash(hash)
+                .longUrl(link.getActualUrl())
+                .build();
+    }
+
+    public Links getLinkByHash(String hash) {
+        return linkRepository.findById(Base62.decode(hash)).orElse(null);
+    }
+
 }

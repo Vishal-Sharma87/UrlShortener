@@ -4,10 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spring.springboot.UrlShortener.serviceDtos.serviceResponseDtos.RedirectServiceResponseDto;
 import com.spring.springboot.UrlShortener.services.RedirectService;
 import com.spring.springboot.UrlShortener.utils.virusTotalUtils.virusTotalServices.FinalVerdict;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 //@RestController
+@Slf4j
 @Controller // using @Controller because it supports html page rendering and user clicks
 @RequestMapping("/url.shortener")
 @RequiredArgsConstructor
@@ -24,9 +24,17 @@ public class RedirectionController {
 
 
     @GetMapping("/{hash}")
-    public String redirectionFromHashToLongUrl(@PathVariable String hash, Model model) throws JsonProcessingException {
+    public String redirectionFromHashToLongUrl(@PathVariable String hash, Model model, HttpServletRequest request) throws JsonProcessingException {
 
-        RedirectServiceResponseDto url = redirectService.getActualUrlIfExists(hash);
+
+        /*
+          dto = {
+         * status,
+         * shortCode,
+         * longUrl
+         * }
+         */
+        RedirectServiceResponseDto dto = redirectService.getUrlStatusIfExists(hash);
 
         /*
          * the link is found now there are three main options associated with status of link
@@ -40,21 +48,23 @@ public class RedirectionController {
          * case 3 "MALICIOUS" -> no redirection in any scenario
          */
 
-        switch (url.getStatus()) {
+        switch (dto.getStatus()) {
             case FinalVerdict.Verdict.SAFE:
                 // Direct redirect
-                return "redirect:" + url.getActualUrl();
+                model.addAttribute("shortCode", hash);
+                model.addAttribute("longUrl", dto.getLongUrl());
+                return "track";
 
             case FinalVerdict.Verdict.SUSPICIOUS, FinalVerdict.Verdict.PENDING_REVERIFICATION,
                  FinalVerdict.Verdict.UNVERIFIED:
                 // Show warning + confirm
                 model.addAttribute("shortCode", hash);
-                model.addAttribute("longUrl", url.getActualUrl());
+                model.addAttribute("longUrl", dto.getLongUrl());
                 return "suspicious-warning";
 
             case FinalVerdict.Verdict.MALICIOUS:
                 // Show blocked page
-                model.addAttribute("longUrl", url.getActualUrl());
+                model.addAttribute("longUrl", dto.getLongUrl());
                 return "malicious-warning";
 
             default:
@@ -64,21 +74,5 @@ public class RedirectionController {
 
     }
 
-
-    @GetMapping("/confirm/{shortCode}")
-    public ResponseEntity<?> confirmAndRedirect(@PathVariable String shortCode) throws JsonProcessingException {
-
-        RedirectServiceResponseDto res = redirectService.getActualUrlIfExists(shortCode);
-
-        if (res == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Invalid or expired short link");
-        }
-
-        // Redirect to the original long URL
-        return ResponseEntity.status(302)
-                .header(HttpHeaders.LOCATION, res.getActualUrl())
-                .build();
-    }
 
 }

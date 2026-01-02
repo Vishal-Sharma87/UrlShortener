@@ -4,6 +4,7 @@ package com.spring.springboot.UrlShortener.services.jwtAuth;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -14,8 +15,8 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class JwtService {
 
-
-    private String secretKey = "U7j39o1yVJ3a83kd1s+pd9P1C2QWmJH93sahEKS9oFUGYp4YlNQW3kdz0O8tE9nK";
+    @Value("${jwt.secretKey}")
+    private String secretKey;
 
 
     public String generateJwt(String subject) {

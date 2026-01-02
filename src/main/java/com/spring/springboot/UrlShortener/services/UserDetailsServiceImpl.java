@@ -21,7 +21,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         UrlUser userInDb = userRepository.findUserByUserName(username);
 
         if (userInDb == null)
-            throw new ResourceNotExistsException("User with userName" + username + "Not exists in database");
+            throw new ResourceNotExistsException("User with userName " + username + " Not exists in database");
 
         return User.builder()
                 .authorities(userInDb.getAuthorities())

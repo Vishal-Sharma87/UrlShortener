@@ -1,6 +1,7 @@
 package com.spring.springboot.UrlShortener.model;
 
 
+import com.spring.springboot.UrlShortener.dto.TrackPayloadDto;
 import lombok.*;
 
 @Data
@@ -10,6 +11,6 @@ import lombok.*;
 @ToString
 public class LinkAnalysisDto {
 
-    private String key;
-    private String value;
+    private String entityIp;
+    private TrackPayloadDto trackPayloadDto;
 }

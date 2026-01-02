@@ -33,6 +33,4 @@ public class RedisService {
         String jsonConvertedStringContent = objectMapper.writeValueAsString(document);
         redisTemplate.opsForValue().set(id, jsonConvertedStringContent);
     }
-
-
 }
