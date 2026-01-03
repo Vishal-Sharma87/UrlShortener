@@ -29,6 +29,8 @@ public class JwtService {
         return Jwts.builder()
                 .subject(subject)
                 .claims(defaultClaims)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 10 * 10 ))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }

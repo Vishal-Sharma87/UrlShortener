@@ -1,13 +1,9 @@
 package com.spring.springboot.UrlShortener.services;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spring.springboot.UrlShortener.dto.ReportLinkRequestDto;
-import com.spring.springboot.UrlShortener.entity.AbuseReport;
 import com.spring.springboot.UrlShortener.exceptions.InvalidOTPException;
 import com.spring.springboot.UrlShortener.exceptions.LinkAlreadyReportedByCurrentEmailOfReporterException;
-import com.spring.springboot.UrlShortener.repositories.AbuseReportRepository;
-import com.spring.springboot.UrlShortener.repositories.MongoLinkService;
 import com.spring.springboot.UrlShortener.repositories.MongoReportLinkService;
 import com.spring.springboot.UrlShortener.services.asyncServices.AsyncReportService;
 import jakarta.validation.Valid;

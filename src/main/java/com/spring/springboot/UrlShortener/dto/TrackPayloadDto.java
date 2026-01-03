@@ -16,7 +16,7 @@ public class TrackPayloadDto {
     private String shortHash;
 
     // Screen information
-//    for currect project not considering height because the main categorization is based on width not height
+//    for current project not considering height because the main categorization is based on width not height
     private Integer screenWidth;
 
     // Browser viewport

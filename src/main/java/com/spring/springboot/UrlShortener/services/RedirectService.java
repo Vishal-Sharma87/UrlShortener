@@ -3,27 +3,34 @@ package com.spring.springboot.UrlShortener.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spring.springboot.UrlShortener.dto.RedisDocument;
 import com.spring.springboot.UrlShortener.entity.Links;
+import com.spring.springboot.UrlShortener.exceptions.ResourceWithHashNotExistsException;
 import com.spring.springboot.UrlShortener.serviceDtos.serviceResponseDtos.RedirectServiceResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RedirectService {
+    private static final String REDIS_LINK_KEY_PREFIX = "link_with_id_";
     private final MongoTemplate mongoTemplate;
     private final RedisService redisService;
     private final LinkService linkService;
 
-    public RedirectServiceResponseDto getActualUrlIfExists(String hash) throws JsonProcessingException {
+    public RedirectServiceResponseDto getActualUrlIfExists(String hash) {
 
-        Long id = Base62.decode(hash);
-//        as we have created a new database collection to store malicious urls separately,
-//        and at creation stage, we already have sent the shortened url, so to check whether a short urls is
-//        either associated with malicious url or not we have to first lookup at malicious_url_collection
-//        if it found it means the shortened url is unsafe for current user, and we have to alert the user about it
+        Long id;
+        try {
+            id = Base62.decode(hash);
+        } catch (Exception ex) {
+            throw new ResourceWithHashNotExistsException("Malformed short URL");
+        }
 
 //        caching -> get -> found ? return : find in database
 
@@ -33,17 +40,18 @@ public class RedirectService {
          * ownerName -> extracted from actual Link document. (for analysis)
          * actualUrl -> extracted from actual Link document (for redirection)
          */
-        RedisDocument redisDocument = null;// redisService.get("link_associated_with_id_" + id.toString());
-        if (redisDocument != null) {
-
-
-//            actual url
-            return RedirectServiceResponseDto.builder()
-                    .longUrl(redisDocument.getActualUrl())
-                    .status(redisDocument.getStatus())
-                    .build();
+        try {
+            RedisDocument redisDocument = redisService.get(REDIS_LINK_KEY_PREFIX + id);
+            if (redisDocument != null) {
+                //            actual url
+                return RedirectServiceResponseDto.builder()
+                        .longUrl(redisDocument.getActualUrl())
+                        .status(redisDocument.getStatus())
+                        .build();
+            }
+        } catch (JsonProcessingException e) {
+            log.error("Json parsing error while fetching short link document from the Redis. Exception: {}", e.getMessage());
         }
-
 
 //        database query -> found ? set in caching (redis) : invalid url
 
@@ -73,8 +81,11 @@ public class RedirectService {
                     .status(linkInDb.getStatus())
                     .ownerUserName(linkInDb.getOwnerUserName())
                     .build();
-            redisService.set("link_associated_with_id_" + id, documentToInsertInRedis);
-
+            try {
+                redisService.set(REDIS_LINK_KEY_PREFIX + id, documentToInsertInRedis, 600, TimeUnit.SECONDS);
+            } catch (JsonProcessingException e) {
+                log.error("Something went wrong while saving the redis document associated with hash: {}. Exception: {}", hash, e.getMessage());
+            }
 
 //            analysis -> kafka integration
             return RedirectServiceResponseDto.builder()
@@ -82,9 +93,8 @@ public class RedirectService {
                     .status(linkInDb.getStatus())
                     .build();
         }
-
-//        throw new ResourceWithHashNotExistsException("Invalid url, try with correct url");
-        return null;
+//      no short link found
+        throw new ResourceWithHashNotExistsException("Invalid url, try with correct url");
     }
 
     public RedirectServiceResponseDto getUrlStatusIfExists(String hash) {

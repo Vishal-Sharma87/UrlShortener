@@ -7,6 +7,7 @@ import com.spring.springboot.UrlShortener.dto.emailComponents.EmailContentBuilde
 import com.spring.springboot.UrlShortener.dto.emailComponents.EmailDto;
 import com.spring.springboot.UrlShortener.services.emailServices.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,17 +19,18 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OtpService {
 
 
+    private static final String REDIS_KEY_FOR_EMAIL_OTP = "otpFor:";
     private final SecureRandom random = new SecureRandom();
     private final StringRedisTemplate stringRedisTemplate;
-
     private final EmailContentBuilder emailContentBuilder;
     private final EmailService emailService;
-    ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
 
     //    generate a random numeric string of length 4
     private String generateFourLengthNumericOtp() {
@@ -46,7 +48,8 @@ public class OtpService {
             byte[] hashBytes = digest.digest(combined.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hashBytes);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing OTP", e);
+            log.error("Something went wrong while hashing the OTP. Exception: {}", e.getMessage());
+            throw new IllegalStateException("SHA-256 not available");
         }
     }
 
@@ -64,42 +67,36 @@ public class OtpService {
         OtpDto otpDoc = OtpDto.builder()
                 .hashedOtp(hashedOtp)
                 .createdAt(System.currentTimeMillis())
-                .expiresAt(System.currentTimeMillis() + 300_000L) // 5 min
+                .expiresAt(System.currentTimeMillis() + 1000 * 60 * 8) // 8 min
                 .used(false)
                 .build();
 
         String stringOtpDoc = mapper.writeValueAsString(otpDoc);
 
-        stringRedisTemplate.opsForValue().set("otpFor:" + email, stringOtpDoc, 5, TimeUnit.MINUTES);
-
-//        step 4: -> email the otp
-//        TODO send the generated otp to the given mail address
+        stringRedisTemplate.opsForValue().set(REDIS_KEY_FOR_EMAIL_OTP + email, stringOtpDoc, 8, TimeUnit.MINUTES);
 
 
         EmailDto emailDto = emailContentBuilder.getEmilDtoWithOtpContent(generatedOtp, email);
         try {
             emailService.sendEmail(emailDto);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.warn("Something went wrong with Sendgrid api while sending the otp for the email: {}. Exception: {}", email, e.getMessage());
         }
     }
-
 
 
     public boolean verifyOtp(String email, String otp) throws JsonProcessingException {
         String salt = "random-salt-xyz";
         String hashedOtp = hashOtp(otp, salt);
 
-        String stringOtpDoc = stringRedisTemplate.opsForValue().get("otpFor:" + email);
+        String stringOtpDoc = stringRedisTemplate.opsForValue().get(REDIS_KEY_FOR_EMAIL_OTP + email);
+        if (stringOtpDoc == null) return false;
 
         OtpDto otpDto = mapper.readValue(stringOtpDoc, OtpDto.class);
 
-        if (!otpDto.isUsed() && otpDto.getExpiresAt() >= System.currentTimeMillis() && hashedOtp.equals(otpDto.getHashedOtp())) {
+        if (!otpDto.isUsed() && otpDto.getExpiresAt() >= System.currentTimeMillis() && hashedOtp != null && hashedOtp.equals(otpDto.getHashedOtp())) {
 
-            otpDto.setUsed(true);
-            String redisOtpDoc = mapper.writeValueAsString(otpDto);
-
-            stringRedisTemplate.opsForValue().set("otpFor:" + email, redisOtpDoc);
+            stringRedisTemplate.delete(REDIS_KEY_FOR_EMAIL_OTP + email);
             return true;
 
         }

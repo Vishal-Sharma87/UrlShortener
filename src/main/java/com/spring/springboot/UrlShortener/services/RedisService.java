@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 @RequiredArgsConstructor
 public class RedisService {
@@ -29,8 +31,9 @@ public class RedisService {
     }
 
     //    setter
-    public void set(String id, RedisDocument document) throws JsonProcessingException {
+    public void set(String id, RedisDocument document, int ttl, TimeUnit timeUnit) throws JsonProcessingException {
         String jsonConvertedStringContent = objectMapper.writeValueAsString(document);
-        redisTemplate.opsForValue().set(id, jsonConvertedStringContent);
+
+        redisTemplate.opsForValue().set(id, jsonConvertedStringContent, ttl, timeUnit);
     }
 }

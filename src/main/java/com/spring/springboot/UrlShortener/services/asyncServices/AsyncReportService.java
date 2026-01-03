@@ -57,7 +57,6 @@ public class AsyncReportService {
 
         abuseReportRepository.save(reportObject);
 //        send a confirmation mail that we have accepted his report and will notify after confirmation
-//        reportLinkService.saveNewReport(reportObject);
         EmailDto emailDtoWithSuccessfulReportContent = emailContentBuilder.getEmailDtoWithSuccessfulReportContent(dto.getLinkToReport(), dto.getReporterEmail());
         try {
             emailService.sendEmail(emailDtoWithSuccessfulReportContent);

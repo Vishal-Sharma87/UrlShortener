@@ -20,20 +20,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class RedirectionController {
 
+    private static final String LONG_URL = "longUrl";
+    private static final String SHORT_CODE = "shortCode";
+    private static final String MESSAGE = "message";
     private final RedirectService redirectService;
-
 
     @GetMapping("/{hash}")
     public String redirectionFromHashToLongUrl(@PathVariable String hash, Model model, HttpServletRequest request) throws JsonProcessingException {
 
-
-        /*
-          dto = {
-         * status,
-         * shortCode,
-         * longUrl
-         * }
-         */
         RedirectServiceResponseDto dto = redirectService.getUrlStatusIfExists(hash);
 
         /*
@@ -51,24 +45,24 @@ public class RedirectionController {
         switch (dto.getStatus()) {
             case FinalVerdict.Verdict.SAFE:
                 // Direct redirect
-                model.addAttribute("shortCode", hash);
-                model.addAttribute("longUrl", dto.getLongUrl());
+                model.addAttribute(SHORT_CODE, hash);
+                model.addAttribute(LONG_URL, dto.getLongUrl());
                 return "track";
 
             case FinalVerdict.Verdict.SUSPICIOUS, FinalVerdict.Verdict.PENDING_REVERIFICATION,
                  FinalVerdict.Verdict.UNVERIFIED:
                 // Show warning + confirm
-                model.addAttribute("shortCode", hash);
-                model.addAttribute("longUrl", dto.getLongUrl());
+                model.addAttribute(SHORT_CODE, hash);
+                model.addAttribute(LONG_URL, dto.getLongUrl());
                 return "suspicious-warning";
 
             case FinalVerdict.Verdict.MALICIOUS:
                 // Show blocked page
-                model.addAttribute("longUrl", dto.getLongUrl());
+                model.addAttribute(LONG_URL, dto.getLongUrl());
                 return "malicious-warning";
 
             default:
-                model.addAttribute("message", "Unknown URL status");
+                log.info("Unknown Url status for hash: {}", hash);
                 return "error";
         }
 

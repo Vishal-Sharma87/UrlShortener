@@ -19,7 +19,7 @@ public class LinkService {
     private final RedisService redisService;
     private final MongoLinkService mongoLinkService;
     private final KafkaTemplate<String, LinkCreationDto> kafkaTemplate;
-    private final String linkCreationTopic = "URL_SHORTENER_link_creation";
+    private static final String LINK_CREATION_TOPIC = "URL_SHORTENER_link_creation";
 
     public String actualUrlToShortHashConversion(String longUrl, String userName) {
         /* will do following steps
@@ -42,7 +42,7 @@ public class LinkService {
                 .longUrl(longUrl)
                 .ownerUserName(userName)
                 .build();
-        kafkaTemplate.send(linkCreationTopic, dtoToCreate);
+        kafkaTemplate.send(LINK_CREATION_TOPIC, dtoToCreate);
 
 //        step 4 return the hash
         return generatedHash;
