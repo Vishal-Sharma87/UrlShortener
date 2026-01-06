@@ -2,7 +2,7 @@ package com.spring.springboot.UrlShortener.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spring.springboot.UrlShortener.dto.RedisDocument;
+import com.spring.springboot.UrlShortener.dto.RedisDtos.LinkDocForCacheDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -20,18 +20,17 @@ public class RedisService {
         return redisTemplate.opsForValue().increment("url_counter");
     }
 
-
     //    Getter
-    public RedisDocument get(String id) throws JsonProcessingException {
+    public LinkDocForCacheDto get(String id) throws JsonProcessingException {
         String storedJsonContent = redisTemplate.opsForValue().get(id);
         if (storedJsonContent == null) {
             return null;
         }
-        return objectMapper.readValue(storedJsonContent, RedisDocument.class);
+        return objectMapper.readValue(storedJsonContent, LinkDocForCacheDto.class);
     }
 
     //    setter
-    public void set(String id, RedisDocument document, int ttl, TimeUnit timeUnit) throws JsonProcessingException {
+    public void set(String id, LinkDocForCacheDto document, int ttl, TimeUnit timeUnit) throws JsonProcessingException {
         String jsonConvertedStringContent = objectMapper.writeValueAsString(document);
 
         redisTemplate.opsForValue().set(id, jsonConvertedStringContent, ttl, timeUnit);

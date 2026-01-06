@@ -1,7 +1,7 @@
 package com.spring.springboot.UrlShortener.configurations;
 
 import com.spring.springboot.UrlShortener.filter.JwtFilter;
-import com.spring.springboot.UrlShortener.services.UserDetailsServiceImpl;
+import com.spring.springboot.UrlShortener.services.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +34,15 @@ public class UrlSecurityConfig {
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
-                        .requestMatchers("/auth/**", "/verify/**", "/url.shortener/**", "/report-abuse/**", "/api/**").permitAll()
+                        .requestMatchers(
+                                "/auth/**"
+                                , "/verify/**"
+                                , "/url.shortener/**"
+                                , "/report-abuse/**"
+                                , "/api/**"
+                                ,"swagger-ui/**"
+                                ,"v3/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 // Enable JWT based Authentication

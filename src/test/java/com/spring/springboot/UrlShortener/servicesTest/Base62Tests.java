@@ -1,6 +1,6 @@
 package com.spring.springboot.UrlShortener.servicesTest;
 
-import com.spring.springboot.UrlShortener.services.Base62;
+import com.spring.springboot.UrlShortener.services.links.Base62;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

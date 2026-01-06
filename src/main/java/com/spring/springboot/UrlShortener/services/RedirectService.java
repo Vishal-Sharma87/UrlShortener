@@ -1,10 +1,12 @@
 package com.spring.springboot.UrlShortener.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.spring.springboot.UrlShortener.dto.RedisDocument;
+import com.spring.springboot.UrlShortener.dto.RedisDtos.LinkDocForCacheDto;
 import com.spring.springboot.UrlShortener.entity.Links;
-import com.spring.springboot.UrlShortener.exceptions.ResourceWithHashNotExistsException;
-import com.spring.springboot.UrlShortener.serviceDtos.serviceResponseDtos.RedirectServiceResponseDto;
+import com.spring.springboot.UrlShortener.advices.exceptions.ResourceWithHashNotExistsException;
+import com.spring.springboot.UrlShortener.dto.RedirectServiceResponseDto;
+import com.spring.springboot.UrlShortener.services.links.Base62;
+import com.spring.springboot.UrlShortener.services.links.LinkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -41,12 +43,12 @@ public class RedirectService {
          * actualUrl -> extracted from actual Link document (for redirection)
          */
         try {
-            RedisDocument redisDocument = redisService.get(REDIS_LINK_KEY_PREFIX + id);
-            if (redisDocument != null) {
+            LinkDocForCacheDto linkDocForCacheDto = redisService.get(REDIS_LINK_KEY_PREFIX + id);
+            if (linkDocForCacheDto != null) {
                 //            actual url
                 return RedirectServiceResponseDto.builder()
-                        .longUrl(redisDocument.getActualUrl())
-                        .status(redisDocument.getStatus())
+                        .longUrl(linkDocForCacheDto.getActualUrl())
+                        .status(linkDocForCacheDto.getStatus())
                         .build();
             }
         } catch (JsonProcessingException e) {
@@ -75,7 +77,7 @@ public class RedirectService {
         Links linkInDb = mongoTemplate.findOne(query, Links.class);
         if (linkInDb != null) {
 //            insert RedisDocument into redis for caching
-            RedisDocument documentToInsertInRedis = RedisDocument.builder()
+            LinkDocForCacheDto documentToInsertInRedis = LinkDocForCacheDto.builder()
                     .actualUrl(linkInDb.getActualUrl())
                     .id(linkInDb.getId())
                     .status(linkInDb.getStatus())

@@ -1,6 +1,6 @@
 package com.spring.springboot.UrlShortener.repositories;
 
-import com.spring.springboot.UrlShortener.dto.ReportLinkRequestDto;
+import com.spring.springboot.UrlShortener.dto.requestDtos.ReportLinkRequestDto;
 import com.spring.springboot.UrlShortener.entity.AbuseReport;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

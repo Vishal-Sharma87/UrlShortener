@@ -1,16 +1,16 @@
 package com.spring.springboot.UrlShortener.services.asyncServices;
 
-import com.spring.springboot.UrlShortener.dto.ReportLinkRequestDto;
+import com.spring.springboot.UrlShortener.dto.requestDtos.ReportLinkRequestDto;
 import com.spring.springboot.UrlShortener.dto.emailComponents.EmailContentBuilder;
 import com.spring.springboot.UrlShortener.dto.emailComponents.EmailDto;
 import com.spring.springboot.UrlShortener.entity.AbuseReport;
 import com.spring.springboot.UrlShortener.entity.Links;
-import com.spring.springboot.UrlShortener.exceptions.SendgridEmailFailedException;
+import com.spring.springboot.UrlShortener.advices.exceptions.SendgridEmailFailedException;
 import com.spring.springboot.UrlShortener.repositories.AbuseReportRepository;
 import com.spring.springboot.UrlShortener.repositories.MongoLinkService;
-import com.spring.springboot.UrlShortener.services.LinkService;
+import com.spring.springboot.UrlShortener.services.links.LinkService;
 import com.spring.springboot.UrlShortener.services.emailServices.EmailService;
-import com.spring.springboot.UrlShortener.utils.virusTotalUtils.virusTotalServices.FinalVerdict;
+import com.spring.springboot.UrlShortener.thirdPartyUtils.virusTotalUtils.virusTotalServices.FinalVerdict;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;

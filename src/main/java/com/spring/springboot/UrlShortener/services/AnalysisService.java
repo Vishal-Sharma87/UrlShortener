@@ -2,13 +2,14 @@ package com.spring.springboot.UrlShortener.services;
 
 
 import com.spring.springboot.UrlShortener.dto.TrackPayloadDto;
-import com.spring.springboot.UrlShortener.dto.geoIpResponses.GeoInfo;
+import com.spring.springboot.UrlShortener.dto.geoIpResponses.IpInfo;
 import com.spring.springboot.UrlShortener.entity.LinkInformation;
 import com.spring.springboot.UrlShortener.entity.Links;
 import com.spring.springboot.UrlShortener.enums.Browser;
 import com.spring.springboot.UrlShortener.enums.Device;
 import com.spring.springboot.UrlShortener.enums.OperatingSystem;
 import com.spring.springboot.UrlShortener.model.LinkAnalysisDto;
+import com.spring.springboot.UrlShortener.services.links.LinkService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,16 +26,13 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class AnalysisService {
 
+    private static final String GENERIC_IP_INFO_API = "ipapi.co/{ip}/json";
     private final KafkaTemplate<String, LinkAnalysisDto> kafkaTemplate;
     private final WebClient webClient;
     private final LinkService linkService;
     private final LinkInformationService linkInformationService;
 
-
-    private final String genericApi = "ipapi.co/{ip}/json";
-
-
-    private String getClientIp(HttpServletRequest request) {
+    private String getClientsIp(HttpServletRequest request) {
 
         String[] headers = {
                 "X-Forwarded-For",
@@ -53,10 +51,9 @@ public class AnalysisService {
         return request.getRemoteAddr();
     }
 
-
     public void sendDataToKafka(TrackPayloadDto dto, HttpServletRequest request) {
 
-        String ip = getClientIp(request);
+        String ip = getClientsIp(request);
 
         LinkAnalysisDto linkAnalysisDto = LinkAnalysisDto.builder()
                 .entityIp(ip)
@@ -81,7 +78,7 @@ public class AnalysisService {
         String ip = linkAnalysisDto.getEntityIp();
 
 //        step3: get geoIpResponses for the extracted ip address
-        GeoInfo geoInfo = getGeoIpResponse(ip);
+        IpInfo ipInfo = getIpRelatedGeoInfoResponse(ip);
 
         int width;
         if (linkAnalysisDto.getTrackPayloadDto().getViewportWidth() == null
@@ -115,7 +112,7 @@ public class AnalysisService {
 
         LinkInformation linkInformation = LinkInformation.builder()
                 .associatedShortHash(hash)
-                .entityGeoInformation(geoInfo)
+                .entityIpInformation(ipInfo)
                 .timeZone(linkAnalysisDto.getTrackPayloadDto().getTimezone())
                 .timeOfClick(Instant.now())
                 .deviceInfo(deviceInfo)
@@ -177,14 +174,13 @@ public class AnalysisService {
         }
     }
 
-
-    private GeoInfo getGeoIpResponse(String ip) {
-        String uriToCall = genericApi.replace("{ip}", ip);
+    private IpInfo getIpRelatedGeoInfoResponse(String ip) {
+        String uriToCall = GENERIC_IP_INFO_API.replace("{ip}", ip);
         try {
             return webClient.get()
                     .uri(new URI(uriToCall))
                     .retrieve()
-                    .bodyToMono(GeoInfo.class)
+                    .bodyToMono(IpInfo.class)
                     .block();
         } catch (URISyntaxException e) {
             log.error("Something went wrong while converting the api for GeoIp response. Exception: {}", e.getMessage());

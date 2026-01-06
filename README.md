@@ -2,6 +2,8 @@
 
 A backend-driven URL shortener that generates short links, applies safety verdicts, tracks click analytics, and redirects users securely.
 
+📘 **Detailed API Documentation:**  
+➡️ [API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)
 
 ## Features
 

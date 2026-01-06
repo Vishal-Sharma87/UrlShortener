@@ -1,7 +1,7 @@
 package com.spring.springboot.UrlShortener.repositories;
 
+import com.spring.springboot.UrlShortener.advices.exceptions.ResourceNotExistsException;
 import com.spring.springboot.UrlShortener.entity.Links;
-import com.spring.springboot.UrlShortener.exceptions.ResourceNotExistsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -115,11 +115,11 @@ public class MongoLinkService {
         Query query = new Query();
 
         Criteria criteria = new Criteria().andOperator(
-                Criteria.where("id").is(idToFind),
+                Criteria.where("id").is(Long.parseLong(idToFind)),
                 Criteria.where(ownerUserName).is(userName)
         );
         query.addCriteria(criteria);
-        return mongoTemplate.find(query, Links.class).stream().findFirst().orElse(null);
+        return mongoTemplate.find(query, Links.class).stream().findFirst().orElseThrow(() -> new ResourceNotExistsException("Link does not exists, id: " + idToFind));
     }
 
     public Links findLinkByHashedKey(String hashedKey) {

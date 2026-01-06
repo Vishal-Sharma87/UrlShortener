@@ -1,11 +1,12 @@
 package com.spring.springboot.UrlShortener.services;
 
 
-import com.spring.springboot.UrlShortener.dto.ReportLinkRequestDto;
-import com.spring.springboot.UrlShortener.exceptions.InvalidOTPException;
-import com.spring.springboot.UrlShortener.exceptions.LinkAlreadyReportedByCurrentEmailOfReporterException;
+import com.spring.springboot.UrlShortener.dto.requestDtos.ReportLinkRequestDto;
+import com.spring.springboot.UrlShortener.advices.exceptions.InvalidOTPException;
+import com.spring.springboot.UrlShortener.advices.exceptions.LinkAlreadyReportedByCurrentEmailOfReporterException;
 import com.spring.springboot.UrlShortener.repositories.MongoReportLinkService;
 import com.spring.springboot.UrlShortener.services.asyncServices.AsyncReportService;
+import com.spring.springboot.UrlShortener.services.auth.OtpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,7 @@ public class ReportLinkService {
 
     private final OtpService otpService;
     private final MongoReportLinkService mongoReportLinkService;
-
     private final AsyncReportService asyncReportService;
-
 
     public void tryAcceptingReport(@Valid ReportLinkRequestDto dto) {
         /*
@@ -30,7 +29,7 @@ public class ReportLinkService {
 
 //        step 1: -> validate otp
         try {
-            otpService.verifyOtp(dto.getReporterEmail(), dto.getOtp());
+            otpService.isValidOtp(dto.getReporterEmail(), dto.getOtp());
         } catch (Exception e) {
             throw new InvalidOTPException("Invalid otp, please enter a valid otp");
         }

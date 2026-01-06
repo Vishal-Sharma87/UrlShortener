@@ -1,6 +1,6 @@
 package com.spring.springboot.UrlShortener.geoIpTests;
 
-import com.spring.springboot.UrlShortener.dto.geoIpResponses.GeoInfo;
+import com.spring.springboot.UrlShortener.dto.geoIpResponses.IpInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +30,7 @@ class TestResponseFromGeoIpForIpAddress {
         String replace = url.replace("{ip}", ip);
 
         URI uri = new URI("https://ipapi.co/8.8.8.8/json");
-        ResponseEntity<GeoInfo> forEntity = restTemplate.getForEntity(uri, GeoInfo.class);
+        ResponseEntity<IpInfo> forEntity = restTemplate.getForEntity(uri, IpInfo.class);
 
 
 

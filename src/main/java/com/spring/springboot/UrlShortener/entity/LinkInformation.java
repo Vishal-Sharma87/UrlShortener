@@ -1,6 +1,6 @@
 package com.spring.springboot.UrlShortener.entity;
 
-import com.spring.springboot.UrlShortener.dto.geoIpResponses.GeoInfo;
+import com.spring.springboot.UrlShortener.dto.geoIpResponses.IpInfo;
 import com.spring.springboot.UrlShortener.enums.Browser;
 import com.spring.springboot.UrlShortener.enums.Device;
 import com.spring.springboot.UrlShortener.enums.OperatingSystem;
@@ -24,7 +24,7 @@ public class LinkInformation {
     @Indexed
     private String associatedShortHash;
 
-    private GeoInfo entityGeoInformation;
+    private IpInfo entityIpInformation;
 
     private ClickerDeviceInfo deviceInfo;
 

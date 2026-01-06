@@ -1,9 +1,9 @@
 package com.spring.springboot.UrlShortener.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.spring.springboot.UrlShortener.serviceDtos.serviceResponseDtos.RedirectServiceResponseDto;
+import com.spring.springboot.UrlShortener.dto.RedirectServiceResponseDto;
 import com.spring.springboot.UrlShortener.services.RedirectService;
-import com.spring.springboot.UrlShortener.utils.virusTotalUtils.virusTotalServices.FinalVerdict;
+import com.spring.springboot.UrlShortener.thirdPartyUtils.virusTotalUtils.virusTotalServices.FinalVerdict;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,6 @@ public class RedirectionController {
 
     private static final String LONG_URL = "longUrl";
     private static final String SHORT_CODE = "shortCode";
-    private static final String MESSAGE = "message";
     private final RedirectService redirectService;
 
     @GetMapping("/{hash}")
@@ -58,7 +57,7 @@ public class RedirectionController {
 
             case FinalVerdict.Verdict.MALICIOUS:
                 // Show blocked page
-                model.addAttribute(LONG_URL, dto.getLongUrl());
+                model.addAttribute("message", "The link you are trying to access is confirmed Malicious.");
                 return "malicious-warning";
 
             default:

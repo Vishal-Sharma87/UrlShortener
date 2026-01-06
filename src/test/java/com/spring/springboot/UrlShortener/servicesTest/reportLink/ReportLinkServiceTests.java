@@ -1,7 +1,7 @@
 package com.spring.springboot.UrlShortener.servicesTest.reportLink;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.spring.springboot.UrlShortener.services.OtpService;
+import com.spring.springboot.UrlShortener.services.auth.OtpService;
 import com.spring.springboot.UrlShortener.services.ReportLinkService;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

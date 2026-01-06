@@ -1,6 +1,6 @@
 package com.spring.springboot.UrlShortener.entity;
 
-import com.spring.springboot.UrlShortener.utils.virusTotalUtils.virusTotalServices.FinalVerdict;
+import com.spring.springboot.UrlShortener.thirdPartyUtils.virusTotalUtils.virusTotalServices.FinalVerdict;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -51,6 +51,4 @@ public class Links {
 
     //    how many times the link is clicked
     private Integer clickCount;
-
-
 }
