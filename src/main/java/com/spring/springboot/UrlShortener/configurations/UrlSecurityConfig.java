@@ -36,6 +36,7 @@ public class UrlSecurityConfig {
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers(
                                 "/auth/**"
+                                , "/"
                                 , "/verify/**"
                                 , "/url.shortener/**"
                                 , "/report-abuse/**"
