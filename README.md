@@ -65,6 +65,9 @@ Tracking is designed as best-effort:
 - Spring MVC
 - Spring Security (JWT-based authentication)
 - REST APIs
+- Kafka
+- Mongodb
+- Redis
 - JavaScript (client-side analytics)
 - Maven
 - Git & GitHub
