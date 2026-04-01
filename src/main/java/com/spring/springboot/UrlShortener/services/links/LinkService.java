@@ -8,10 +8,16 @@ import com.spring.springboot.UrlShortener.model.LinkCreationDto;
 import com.spring.springboot.UrlShortener.repositories.LinkRepository;
 import com.spring.springboot.UrlShortener.repositories.MongoLinkService;
 import com.spring.springboot.UrlShortener.services.RedisService;
+import com.spring.springboot.UrlShortener.thirdPartyUtils.virusTotalUtils.virusTotalServices.FinalVerdict;
+import com.spring.springboot.UrlShortener.thirdPartyUtils.virusTotalUtils.virusTotalServices.VirusTotalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,6 +30,15 @@ public class LinkService {
     private final RedisService redisService;
     private final MongoLinkService mongoLinkService;
     private final KafkaTemplate<String, LinkCreationDto> kafkaTemplate;
+
+    @Value("${spring.link-creation.company-domain}")
+    private String COMPANY_DOMAIN;
+
+    @Value("${spring.link-creation.company-endpoint}")
+    private String COMPANY_ENDPOINT;
+
+    // just to test synchronous link creation
+    private final VirusTotalService virusTotalService;
 
     private String actualUrlToShortHashConversion(String longUrl, String userName) {
         /* will do following steps
@@ -49,6 +64,44 @@ public class LinkService {
         kafkaTemplate.send(LINK_CREATION_TOPIC, dtoToCreate);
 
 //        step 4 return the hash
+        return generatedHash;
+    }
+
+
+    private String actualUrlToShortHashConversionSync(String longUrl, String userName) {
+        /* will do following steps
+         * 1 -> get counter value from redis
+         * 2 -> convert counter to hash
+         * 3 -> scan the url through VT SERVICE's API synchronously
+         * 4 -> save the link into DB
+         * 5 -> return short hash
+         */
+
+//        step 1 get counter
+        Long urlCounter = redisService.getUrlCounter();
+
+//        step 2 generate hash using Base62
+        String generatedHash = Base62.encode(urlCounter);
+
+//        step 3 call VT service to scan url and get a Verdict of it
+        Mono<FinalVerdict.Verdict> verdict = virusTotalService.scanUrl(longUrl);
+
+//        step 4 save into db
+        saveNewLink(Links.builder()
+                .id(urlCounter)
+                .actualUrl(longUrl)
+                .hashedKey(generatedHash)
+                .linkCreationTime(new Date())
+                .status(verdict.block())
+                .ownerUserName(userName)
+                .abuseReports(new ArrayList<>())
+                .firstReportedTime(null)
+                .lastReportedTime(null)
+                .reportCount(0)
+                .clickCount(0)
+                .build());
+
+//        step 5 return the hash
         return generatedHash;
     }
 
@@ -91,10 +144,13 @@ public class LinkService {
     public String generateShortUrl(UrlToShortRequestDto url, String userName) {
 
         String generatedHash = actualUrlToShortHashConversion(url.getActualUrl(), userName);
+        return COMPANY_DOMAIN + COMPANY_ENDPOINT + generatedHash;
+    }
 
-        String companyDomain = "localhost:8080/";
-        String endPointForHandlingRedirection = "url.shortener/";
-        return companyDomain + endPointForHandlingRedirection + generatedHash;
+    public String generateShortUrlSync(UrlToShortRequestDto url, String userName) {
+
+        String generatedHash = actualUrlToShortHashConversionSync(url.getActualUrl(), userName);
+        return COMPANY_DOMAIN + COMPANY_ENDPOINT + generatedHash;
     }
 
     public void saveNewLink(Links createdLink) {
@@ -121,17 +177,6 @@ public class LinkService {
             default -> throw new IllegalArgumentException("Method not allowed, try something else.");
         }
     }
-
-    public Links findLinkByHashedKey(String hashedKey) {
-
-        Long idToFind = Base62.decode(hashedKey);
-        return linkRepository.findById(idToFind).orElse(null);
-    }
-
-    public void save(Links link) {
-        linkRepository.save(link);
-    }
-
     public RedirectServiceResponseDto getLinkStatusIfExists(String hash) {
         Links link = linkRepository.findById(Base62.decode(hash)).orElse(null);
         return link == null ? null : RedirectServiceResponseDto.builder()

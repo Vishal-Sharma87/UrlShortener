@@ -80,6 +80,26 @@ public class LinkController {
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
+
+
+    @PostMapping("create/sync")
+    public ResponseEntity<LinkCreationResponseDto> createNewShortLinkSynchronously(@RequestBody UrlToShortRequestDto urlDto) {
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+
+//      a  method to create a working url from a urlDto
+        String shortUrl = linkService.generateShortUrlSync(urlDto, userName);
+
+//        creating a response to return
+        LinkCreationResponseDto response = LinkCreationResponseDto
+                .builder()
+                .shortUrl(shortUrl)
+                .message("Short URL created and queued for processing.")
+                .status("processing")
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+    }
+
     //    read all
     @Operation(
             summary = "Get all short links of the logged-in user",

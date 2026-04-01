@@ -4,15 +4,16 @@ spring:
 
   data:
     mongodb:
-      host: ${MONGO_HOST}
-      port: ${MONGO_PORT}
-      database: ${MONGO_DB_NAME}
+      uri: ${MONGODB_URI}
       auto-index-creation: true
 
-  redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
-    password: ${REDIS_PASSWORD}
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+  link-creation:
+    company-domain: "${COMPANY_DOMAIN:}"
+    company-endpoint: "${COMPANY_ENDPOINT:}"
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
@@ -48,7 +49,7 @@ sendgrid:
   api_key: ${SENDGRID_API_KEY}
   verified:
     senders:
-      email: ${SENDGRID_EMAIL} #the email which is verified on sendgrid and will be used as from email
+      email: ${SENDGRID_EMAIL} #the email which is verified on sendgrid and will be used as "from" email
 
 jwt:
   secretKey: ${JWT_SECRET_KEY}
