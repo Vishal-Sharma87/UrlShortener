@@ -6,6 +6,7 @@ import com.spring.springboot.UrlShortener.dto.UrlToShortRequestDto;
 import com.spring.springboot.UrlShortener.dto.responseDtos.LinkAsResponseDto;
 import com.spring.springboot.UrlShortener.dto.responseDtos.LinkCreationResponseDto;
 import com.spring.springboot.UrlShortener.dto.responseDtos.LinkQueryResponseDto;
+import com.spring.springboot.UrlShortener.dto.responseDtos.VerdictDebugDto;
 import com.spring.springboot.UrlShortener.entity.Links;
 import com.spring.springboot.UrlShortener.services.links.LinkService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,7 +75,7 @@ public class LinkController {
                 .builder()
                 .shortUrl(shortUrl)
                 .message("Short URL created and queued for processing.")
-                .status("processing")
+                .status("PROCESSING")
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
@@ -93,11 +94,11 @@ public class LinkController {
         LinkCreationResponseDto response = LinkCreationResponseDto
                 .builder()
                 .shortUrl(shortUrl)
-                .message("Short URL created and queued for processing.")
-                .status("processing")
+                .message("Short URL created and working")
+                .status("CREATED")
                 .build();
 
-        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     //    read all
@@ -206,7 +207,13 @@ public class LinkController {
         return new ResponseEntity<>(type + " links are deleted from database", HttpStatus.OK);
     }
 
-//there should be no update mapping because updating an existing url will result in new url creation
+    @GetMapping("/debug/verdict/{shortCode}")
+    public ResponseEntity<VerdictDebugDto> getVerdictDetails(@PathVariable String shortCode) {
+        // fetch from your processing storage / metadata store
+        // return the full verdict breakdown
+        VerdictDebugDto details = linkService.getVerdictDetails(shortCode);
 
+        return ResponseEntity.ok(details);
+    }
 
 }

@@ -49,6 +49,7 @@ public class AsyncReportService {
 
         linkService.save(link);
 
+
 //        if report count crosses a threshold-> change its status as suspicious till manual verification
         if (reportCount == 3) {
             link.setStatus(FinalVerdict.Verdict.PENDING_REVERIFICATION);

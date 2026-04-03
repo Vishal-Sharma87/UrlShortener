@@ -40,7 +40,7 @@ public class ConsumerLinkCreationEvent {
 
 
         // Step 1: Scan URL asynchronously (non-blocking)
-        vtService.scanUrl(linkCreationDto.getLongUrl())
+        vtService.scanUrl(linkCreationDto.getLongUrl(), linkCreationDto.getGeneratedHash())
                 .subscribe(verdict -> {
                     // ⚡ This block runs when scan completes
                     // Step 2: Proceed with URL creation or mark malicious
@@ -58,7 +58,7 @@ public class ConsumerLinkCreationEvent {
                             .reportCount(0)
                             .clickCount(0)
                             .build();
-                    linkService.saveNewLink(createdLink);
+                    linkService.save(createdLink);
 
                     emailService.sendEmail(verdict, userInDb, linkCreationDto);
 

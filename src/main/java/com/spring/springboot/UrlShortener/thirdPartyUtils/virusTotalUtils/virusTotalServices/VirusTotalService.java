@@ -1,5 +1,6 @@
 package com.spring.springboot.UrlShortener.thirdPartyUtils.virusTotalUtils.virusTotalServices;
 
+import com.spring.springboot.UrlShortener.dto.responseDtos.VerdictDebugDto;
 import com.spring.springboot.UrlShortener.thirdPartyUtils.virusTotalUtils.virusTotalDtos.AnalysisIdOfVT;
 import com.spring.springboot.UrlShortener.thirdPartyUtils.virusTotalUtils.virusTotalDtos.AnalysisResultOfVT;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,12 @@ public class VirusTotalService {
     private String apiToGetAnalysisId;
 
 
+
+
     /**
      * Scans a URL and returns a FinalVerdict asynchronously.
      */
-    public Mono<FinalVerdict.Verdict> scanUrl(String url) {
+    public Mono<FinalVerdict.Verdict> scanUrl(String url, String hash) {
 
         return webClient.post()
                 .uri(apiToGetAnalysisId)
@@ -45,7 +48,7 @@ public class VirusTotalService {
                             .timeout(Duration.ofMinutes(2)) // Max polling duration
                             .map(result -> {
                                 AnalysisResultOfVT.Stats stats = result.getData().getAttributes().getStats();
-                                return FinalVerdict.evaluate(stats);
+                                return FinalVerdict.evaluate(stats, hash, url);
                             });
                 })
                 .onErrorResume(e -> Mono.just(FinalVerdict.Verdict.UNVERIFIED));
@@ -65,5 +68,9 @@ public class VirusTotalService {
                 .filter(result -> "completed".equalsIgnoreCase(
                         result.getData().getAttributes().getStatus()
                 ));
+    }
+
+    public VerdictDebugDto getVerdictDetail(String shortCode) {
+        return FinalVerdict.getVerdictDetail(shortCode);
     }
 }

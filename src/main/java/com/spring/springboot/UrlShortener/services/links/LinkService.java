@@ -3,6 +3,7 @@ package com.spring.springboot.UrlShortener.services.links;
 import com.spring.springboot.UrlShortener.dto.RedirectServiceResponseDto;
 import com.spring.springboot.UrlShortener.dto.UrlToShortRequestDto;
 import com.spring.springboot.UrlShortener.dto.responseDtos.LinkAsResponseDto;
+import com.spring.springboot.UrlShortener.dto.responseDtos.VerdictDebugDto;
 import com.spring.springboot.UrlShortener.entity.Links;
 import com.spring.springboot.UrlShortener.model.LinkCreationDto;
 import com.spring.springboot.UrlShortener.repositories.LinkRepository;
@@ -84,10 +85,10 @@ public class LinkService {
         String generatedHash = Base62.encode(urlCounter);
 
 //        step 3 call VT service to scan url and get a Verdict of it
-        Mono<FinalVerdict.Verdict> verdict = virusTotalService.scanUrl(longUrl);
+        Mono<FinalVerdict.Verdict> verdict = virusTotalService.scanUrl(longUrl, generatedHash);
 
 //        step 4 save into db
-        saveNewLink(Links.builder()
+        save(Links.builder()
                 .id(urlCounter)
                 .actualUrl(longUrl)
                 .hashedKey(generatedHash)
@@ -153,7 +154,7 @@ public class LinkService {
         return COMPANY_DOMAIN + COMPANY_ENDPOINT + generatedHash;
     }
 
-    public void saveNewLink(Links createdLink) {
+    public void save(Links createdLink) {
         linkRepository.save(createdLink);
     }
 
@@ -190,4 +191,7 @@ public class LinkService {
         return linkRepository.findById(Base62.decode(hash)).orElse(null);
     }
 
+    public VerdictDebugDto getVerdictDetails(String shortCode) {
+        return virusTotalService.getVerdictDetail(shortCode);
+    }
 }

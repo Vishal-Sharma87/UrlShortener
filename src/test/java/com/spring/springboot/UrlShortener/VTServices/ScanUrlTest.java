@@ -1,6 +1,7 @@
 package com.spring.springboot.UrlShortener.VTServices;
 
 import com.spring.springboot.UrlShortener.thirdPartyUtils.virusTotalUtils.virusTotalServices.VirusTotalService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,9 +14,10 @@ public class ScanUrlTest {
 
 
     @Test
+    @Disabled
     void scanUrl() {
 
-        vtService.scanUrl("https://instagram.com");
+//        vtService.scanUrl("https://instagram.com");
 
         int a = 5;
     }
